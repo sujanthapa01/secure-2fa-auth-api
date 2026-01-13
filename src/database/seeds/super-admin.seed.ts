@@ -1,16 +1,15 @@
 import 'dotenv/config';
-import { PrismaClient, adminRole } from "../../../generated/prisma/client";
+import { PrismaClient, adminRole } from '../../../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import * as bcrypt from "bcrypt";
-
+import * as bcrypt from 'bcrypt';
 
 const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL!
+  connectionString: process.env.DATABASE_URL!,
 });
 
 const prisma = new PrismaClient({
   adapter,
-  log: ['query', 'info', 'warn', 'error']
+  log: ['query', 'info', 'warn', 'error'],
 });
 
 prisma.$on('query', (e) => {
@@ -23,27 +22,27 @@ prisma.$on('error', (e) => {
 
 export const seedSuperAdmin = async () => {
   await prisma.$connect();
-  console.log("Prisma connected");
+  console.log('Prisma connected');
 
   // Check which database we are connected to
-  const result: { current_database: string }[] = await prisma.$queryRaw`SELECT current_database();`;
-  console.log("Connected to DB:", result[0].current_database);
+  const result: { current_database: string }[] =
+    await prisma.$queryRaw`SELECT current_database();`;
+  console.log('Connected to DB:', result[0].current_database);
 
   const email = process.env.SUPER_ADMIN_EMAIL!;
   const password = process.env.SUPER_ADMIN_PASSWORD!;
   const name = process.env.SUPER_ADMIN_NAME!;
 
   if (!email || !password || !name) {
-    console.error("Missing environment variables for super admin!");
+    console.error('Missing environment variables for super admin!');
     await prisma.$disconnect();
     return;
   }
 
   try {
-
     const existed = await prisma.admin.findFirst({ where: { email } });
     if (existed) {
-      console.log("Super Admin already exists:", email);
+      console.log('Super Admin already exists:', email);
       await prisma.$disconnect();
       return;
     }
@@ -55,17 +54,15 @@ export const seedSuperAdmin = async () => {
         email,
         password: hashPassword,
         role: adminRole.SUPER_ADMIN,
-      }
+      },
     });
 
-    console.log("Super Admin seeded successfully:", admin);
-
+    console.log('Super Admin seeded successfully:', admin);
   } catch (error) {
-    console.error("Seeding error:", error);
-
+    console.error('Seeding error:', error);
   } finally {
     await prisma.$disconnect();
-    console.log("Prisma disconnected");
+    console.log('Prisma disconnected');
   }
 };
 
