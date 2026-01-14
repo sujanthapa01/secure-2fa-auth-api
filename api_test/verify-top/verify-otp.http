@@ -1,0 +1,8 @@
+### STEP 2 — Verify OTP
+POST http://localhost:3000/auth/verify-otp
+Content-Type: application/json
+
+{
+  "adminId": "cmke83hke0000csujsf9q1v85",
+  "token": "691278"
+}

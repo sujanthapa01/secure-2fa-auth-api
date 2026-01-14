@@ -12,7 +12,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      jwtSecret: config.get<string>('jwt.secret'),
+      secretOrKey: config.get<string>('jwt.secret')|| "wqycxeb78dy387o23y8o23ys472834",
     });
   }
 
@@ -23,6 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     if (!admin) throw new UnauthorizedException('admin not found');
 
+    console.log("hii this is jwt strategy")
     return { adminId: admin.adminId, email: admin.email, role: admin.role };
   }
 }

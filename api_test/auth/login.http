@@ -1,0 +1,17 @@
+### Login Test - http://localhost:3000/auth/login
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "sujanthapa4001@gmail.com",
+  "password": "sujan@2005"
+}
+### @name login-response
+
+### Expected Response (200 OK)
+### Should return:
+### {
+###   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+###   "refresh_token": "...",
+###   "user": { "userId": 1, "email": "test@example.com" }
+### }

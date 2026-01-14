@@ -11,16 +11,35 @@ interface TOTPSecret {
 
 @Injectable()
 export class TotpService {
-  generateSecret(email: string): TOTPSecret {
-    const secret = speakeasy.generateSecret({
-      name: `my_app {${email}`,
-      length: 20,
-    });
-    return secret;
+ generateSecret(email: string): TOTPSecret {
+  const secret = speakeasy.generateSecret({
+    name: `RoleBaseAuth:${email}`,
+    length: 20,
+  });
+
+  return {
+    ascii: secret.ascii,
+    hex: secret.hex,
+    base32: secret.base32,
+    otpauth_url: secret.otpauth_url!,
+  };
+}
+
+  async generateQrCode(otpauthurl: string) {
+    try {
+      return await qrcode.toDataURL(otpauthurl);
+    } catch (error) {
+      throw new Error(`QR Code generation failed: ${error.message}`)
+    }
   }
 
-  generateQrCode(otpauthurl: string) {
-    return qrcode.toDataUrl(otpauthurl);
+    buildOtpAuthUrl(email: string, secret: string): string {
+    return speakeasy.otpauthURL({
+      issuer: 'RoleBaseAuth',
+      label: email,
+      encoding: 'base32',
+      secret,
+    });
   }
 
   /**

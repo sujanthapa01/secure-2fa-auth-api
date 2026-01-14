@@ -1,7 +1,7 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
-  moduleFormat = "cjs" 
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
@@ -9,14 +9,16 @@ datasource db {
 }
 
 model admin {
-  adminId   String    @id @unique @default(cuid())
-  name      String
-  email     String    @unique
-  password  String
-  role      adminRole @default(ADMIN)
-  totpSecret String?
-  isActive Boolean @default(true)
-  createdAt DateTime  @default(now())
+  adminId        String    @id @unique @default(cuid())
+  name           String
+  email          String    @unique
+  password       String
+  role           adminRole @default(ADMIN)
+  tempTotpSecret String?
+  totpSecret     String?
+  isTotpEnabled Boolean  @default(false)
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
 }
 
 enum adminRole {

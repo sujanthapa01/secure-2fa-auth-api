@@ -16,7 +16,7 @@ export class PrismaService extends PrismaClient
         // Correct way: pass connection string directly to adapter
         const adapter = new PrismaPg({ connectionString: dbUrl });
 
-        super({ adapter, log: ['query', 'error'] });
+        super({ adapter});
     }
 
     async onModuleInit() {

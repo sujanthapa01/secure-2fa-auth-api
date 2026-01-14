@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post,HttpCode,HttpStatus} from '@nestjs/common';
 import { AuthService } from '../services/auth-service/auth.service';
 import { LoginDto, RegisterDto } from '../dto/auth.dto';
 import { Roles } from 'src/common/decorators/roles.decorators';
@@ -13,11 +13,14 @@ export class AuthController {
   async register(@Body() registerDto: RegisterDto) {
     return this.authService.createAdmin(registerDto);
   }
+  
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
 
+ 
+  @HttpCode(HttpStatus.OK)
   @Post('verify-otp')
   async verifyOtp(@Body() body: { adminId: string; token: string }) {
     return this.authService.verifyToken(body.adminId, body.token);
