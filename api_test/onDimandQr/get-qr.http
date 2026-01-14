@@ -1,0 +1,7 @@
+# get the qr on demand
+POST http://localhost:3000/auth/get-qr
+Content-Type: application/json
+
+{
+  "adminId": "cmkebk6v30000c8ujmoj0p887"
+}

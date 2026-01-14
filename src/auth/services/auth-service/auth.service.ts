@@ -76,60 +76,65 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
 
-    let qrCode: string;
-
-    if (!email || !password)
-      throw new UnauthorizedException('email and password are required');
+    if (!email || !password) {
+      throw new UnauthorizedException('Email and password are required');
+    }
 
     const admin = await this.prisma.admin.findFirst({ where: { email } });
 
     if (!admin || !admin.isActive) {
-      throw new UnauthorizedException('unauthorized login');
+      throw new UnauthorizedException('Unauthorized login');
     }
 
     const valid = await bcrypt.compare(password, admin.password);
-
     if (!valid) {
-      throw new UnauthorizedException('wrong password');
+      throw new UnauthorizedException('Wrong password');
     }
 
-    if (!admin.tempTotpSecret) {
-      const { otpauth_url: tempTotpSecret, base32 } = this.totpService.generateSecret(admin.email);
+    if (!admin.totpSecret ) {
+      const { otpauth_url, base32 } = this.totpService.generateSecret(admin.email);
+
       await this.prisma.admin.update({
         where: { adminId: admin.adminId },
-        data: { tempTotpSecret: base32 },
+        data: { totpSecret: base32 },
       });
-      qrCode = await this.totpService.generateQrCode(tempTotpSecret);
-      return { requireTotp: true, qrCode, adminId: admin.adminId };
-    } 
 
-      const otpauthurl = await this.totpService.buildOtpAuthUrl(admin.email,admin.tempTotpSecret)
-      qrCode = await this.totpService.generateQrCode(otpauthurl);
-      return {
-        requireOtp: true,
-        qrCode,
-        adminId: admin.adminId,
-        isTotpEnabled: admin.isTotpEnabled
-      };
+      const qrCode = await this.totpService.generateQrCode(otpauth_url);
+      return { requireTotp: true, adminId: admin.adminId, qrCode };
+    }
 
- 
-
+    return { requireOtp: true, adminId: admin.adminId };
   }
+
+
+  async getQrOnDemand(adminId: string) {
+    const admin = await this.prisma.admin.findFirst({ where: { adminId } });
+
+    if (!admin || !admin.totpSecret || !admin.isTotpEnabled) {
+      throw new BadRequestException('TOTP not enabled for this user');
+    }
+
+    const otpauthUrl = await this.totpService.buildOtpAuthUrl(admin.email, admin.totpSecret);
+    const qrCode = await this.totpService.generateQrCode(otpauthUrl);
+
+    return { adminId: admin.adminId, qrCode };
+  }
+
+
+  
 
   async verifyToken(adminId: string, token: string) {
     const admin = await this.prisma.admin.findFirst({ where: { adminId } });
 
-    if (!admin || !admin.tempTotpSecret)
+    if (!admin || !admin.totpSecret)
       throw new UnauthorizedException('TOTP not setup in process ');
 
-    const valid = this.totpService.verifyOtp(admin.tempTotpSecret, token);
+    const valid = this.totpService.verifyOtp(admin.totpSecret, token);
 
     if (!valid) throw new UnauthorizedException('Invalid OTP');
 
     await this.prisma.admin.update({
       where: { email: admin.email }, data: {
-        totpSecret: admin.tempTotpSecret,
-        tempTotpSecret: null,
         isTotpEnabled: true
       }
     })

@@ -3,6 +3,6 @@ POST http://localhost:3000/auth/verify-otp
 Content-Type: application/json
 
 {
-  "adminId": "cmke83hke0000csujsf9q1v85",
-  "token": "691278"
+  "adminId": "cmkebk6v30000c8ujmoj0p887",
+  "token": "313413"
 }
